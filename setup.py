@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
-"""%%PROJECTNAME%% is xXXXx
+"""Ablage is a System for document archival.
+
+It uses Amazon Webservices (SimpleDB and S3) for it's storage needs.
 """
 
 # setup.py
@@ -8,19 +10,19 @@
 # Copyright (c) 2010 HUDORA. All rights reserved.
 
 from setuptools import setup, find_packages
+import codecs
 
-setup(name='%%PROJECTNAME%%',
+setup(name='Ablage',
       # maintainer='XXX',
       # maintainer_email='xXXXx@hudora.de',
       version='1.0',
-      description='xXXXx FILL IN HERE xXXXx',
-      long_description=long_description=codecs.open('README.rst', "r", "utf-8").read(),
+      description='Document archiving solution',
+      long_description=codecs.open('README.rst', "r", "utf-8").read(),
       classifiers=['License :: OSI Approved :: BSD License',
                    'Intended Audience :: Developers',
                    'Programming Language :: Python'],
-      download_url='https://cybernetics.hudora.biz/nonpublic/eggs/',
-      package_data={"%%MODULENAME%%": ["templates/%%MODULENAME%%/*.html", "reports/*.jrxml", "bin/*"]},
+      # package_data={"%%MODULENAME%%": ["templates/%%MODULENAME%%/*.html", "reports/*.jrxml", "bin/*"]},
       packages=find_packages(),
       include_package_data=True,
-      install_requires=['huTools', 'huDjango'],
+      install_requires=['httplib2', 'boto'],
 )
