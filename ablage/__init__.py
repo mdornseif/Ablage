@@ -39,6 +39,9 @@ def store_doc(akte_id, pdfdata, doc_id=None, **kwargs):
     for key, value in kwargs.items():
         if not key.startswith('akte_'):
             doc[key] = value
+    if 'datum' not in doc:
+        doc['datum'] = datetime.date.today()
+    # Daten speichern
     k = Key(bucket)
     k.key = pdf_id
     k.set_contents_from_string(pdfdata)
