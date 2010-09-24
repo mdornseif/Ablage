@@ -1,4 +1,4 @@
-Django>=1.1
+Django==1.1.2
 googleappsauth>=1.03
 httplib2
 boto
