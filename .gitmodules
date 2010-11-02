@@ -1,0 +1,6 @@
+[submodule "lib/huTools"]
+	path = lib/huTools
+	url = git@github.com:hudora/huTools.git
+[submodule "lib/gaetk"]
+	path = lib/gaetk
+	url = git@github.com:mdornseif/appengine-toolkit.git

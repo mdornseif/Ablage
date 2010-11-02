@@ -1,10 +1,28 @@
-dependencies: update_templates
-	virtualenv pythonenv
-	pip -q install -E pythonenv -r requirements.txt
-	find pythonenv/ -name 'settings.py*' -delete
+deploy:
+	appcfg.py update .
 
-generic_templates:
-	git clone git@github.com:hudora/html.git generic_templates
+check: lib/google_appengine/google/__init__.py
+	pep8 -r --ignore=E501 views/ *.py
+	sh -c 'PYTHONPATH=`python ./config.py` pyflakes *.py'
+	-sh -c 'PYTHONPATH=`python ./config.py` pylint -iy --max-line-length=110 *.py' # -rn
 
-update_templates: generic_templates
-	cd generic_templates ; git pull ; cd -
+lib/google_appengine/google/__init__.py:
+	curl -O http://googleappengine.googlecode.com/files/google_appengine_1.3.8.zip
+	unzip google_appengine_1.3.8.zip
+	rm -Rf lib/google_appengine
+	mv google_appengine lib/
+	rm google_appengine_1.3.8.zip
+
+dependencies: clean
+	git submodule init lib/huTools
+	git submodule init lib/gaetk
+	git submodule update lib/huTools
+	git submodule update lib/gaetk
+	virtualenv --python=python2.5 --no-site-packages --unzip-setuptools pythonenv
+	pythonenv/bin/pip -q install -E pythonenv -r requirements.txt
+
+clean:
+	rm -Rf pythonenv/
+	find . -name '*.pyc' -or -name '*.pyo' -delete
+
+.PHONY: deploy pylint dependencies_for_check_target clean check dependencies
