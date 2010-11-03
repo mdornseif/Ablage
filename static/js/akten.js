@@ -4,7 +4,7 @@ Ext.onReady(function() {
     var store = new Ext.data.JsonStore({
         xtype: 'jsonstore',
         storeId: 'MyStore',
-        url: 'http://localhost:8086/CYLGI/akten',
+        url: 'http://localhost:8086/CYLGI/akten.json',
         root: 'akten',
         autoLoad: true,
         restful: true,
@@ -62,7 +62,7 @@ Ext.onReady(function() {
             listeners: {
                 rowselect: function(sm, index, record)
                 {
-                    window.location = record.get('url');
+                    window.location = record.get('url') + '/';
                 }
             }
         }),

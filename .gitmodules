@@ -4,3 +4,6 @@
 [submodule "lib/gaetk"]
 	path = lib/gaetk
 	url = git@github.com:mdornseif/appengine-toolkit.git
+[submodule "lib/jinja2"]
+	path = lib/jinja2
+	url = http://github.com/mitsuhiko/jinja2.git

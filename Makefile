@@ -16,8 +16,10 @@ lib/google_appengine/google/__init__.py:
 dependencies: clean
 	git submodule init lib/huTools
 	git submodule init lib/gaetk
+	git submodule init lib/jinja2
 	git submodule update lib/huTools
 	git submodule update lib/gaetk
+	git submodule update lib/jinja2
 	virtualenv --python=python2.5 --no-site-packages --unzip-setuptools pythonenv
 	pythonenv/bin/pip -q install -E pythonenv -r requirements.txt
 
