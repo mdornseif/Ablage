@@ -15,3 +15,73 @@ indexes:
   - name: tenant
   - name: created_at
     direction: desc
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: designator
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: email
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: name1
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: name2
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: ort
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: plz
+
+- kind: Akte
+  properties:
+  - name: tenant
+  - name: reference
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: designator
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: email
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: name1
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: name2
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: ort
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: plz
+
+- kind: Dokument
+  properties:
+  - name: tenant
+  - name: reference

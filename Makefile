@@ -2,9 +2,9 @@ deploy:
 	appcfg.py update .
 
 check: lib/google_appengine/google/__init__.py
-	pep8 -r --ignore=E501 views/ *.py
-	sh -c 'PYTHONPATH=`python ./config.py` pyflakes *.py'
-	-sh -c 'PYTHONPATH=`python ./config.py` pylint -iy --max-line-length=110 *.py' # -rn
+	pep8 -r --ignore=E501 ablage/ *.py
+	sh -c 'PYTHONPATH=`python ./config.py` pyflakes ablage/ *.py'
+	-sh -c 'PYTHONPATH=`python ./config.py` pylint -iy --max-line-length=110 ablage/ *.py' # -rn
 
 lib/google_appengine/google/__init__.py:
 	curl -O http://googleappengine.googlecode.com/files/google_appengine_1.3.8.zip

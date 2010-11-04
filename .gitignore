@@ -2,3 +2,4 @@
 *~
 .DS_Store
 pythonenv
+lib/google_appengine/
