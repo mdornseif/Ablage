@@ -154,7 +154,7 @@ To create a Dokument (and it's associated Akte) POST to `http://d-ablage.appspot
 
 * `pdfdata` - raw (scanned) PDF dokument. Currently only document sizes up to 900 kb are supported.
 * `ref` - one or more references to order numbers and then like can be given in `ref`. If you want ot give more than one reference, seperate them with spacese (`" "`, `%20`). The first `ref` beeing given will be the `designator` of the Akte. If none is given, the Akte is given an auto-generated id - but you should try to avoid that.
-* `typ` - the yype of Akte / Dokument. E.g. Invoice.
+* `type` - the type of Akte / Dokument. E.g. Invoice.
 
 
 #### optional fields
@@ -164,10 +164,10 @@ All fields of the [address protocol][1] (`name1`, `name2`, `name3`, `strasse`, `
 The `designator` of a Dokument is always auto-generated and ensures the function is idempotent. The same pdfdata will always return the same document. `datum` should be the date the document was issued/printed or left blank if unknown - it then has to be added by hand later.
 
 The following fields will be filled from their document related counterparts if not given: `akte_name1`,
-`akte_name2`, `akte_name3`, `akte_strasse`, `akte_land`, `akte_plz`, `akte_ort`, `akte_email`, `akte_ref_url`, `akte_typ`.
+`akte_name2`, `akte_name3`, `akte_strasse`, `akte_land`, `akte_plz`, `akte_ort`, `akte_email`, `akte_ref_url`, `akte_type`.
 
 
- curl -X POST -F pdfdata=@/Users/md/Dropbox/CyberlogiArchiv/DC000167-20100915-1.pdf -F ref=DC000167 -F typ=unknown http://localhost:8086/CYLGI/docs
+ curl -X POST -F pdfdata=@/Users/md/Dropbox/CyberlogiArchiv/DC000167-20100915-1.pdf -F ref=DC000167 -F type=unknown http://localhost:8086/CYLGI/docs
 
 
 

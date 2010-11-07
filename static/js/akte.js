@@ -27,7 +27,7 @@ Ext.onReady(function() {
 
 MyPanelUi = Ext.extend(Ext.Panel, {
     title: 'Akte',
-    width: 720,
+    width: 640,
     autoHeight: true,
     headerAsText: false,
     unstyled: true,

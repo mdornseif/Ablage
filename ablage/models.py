@@ -16,6 +16,8 @@ from google.appengine.ext import db
 class Akte(db.Model):
     designator = db.StringProperty(required=True)
     tenant = db.StringProperty(required=True, default='CYLGI')
+    seit = db.DateProperty()
+    ref = db.StringListProperty()
     name1 = db.StringProperty(required=False)
     name2 = db.StringProperty(required=False)
     name3 = db.StringProperty(required=False)
@@ -24,8 +26,7 @@ class Akte(db.Model):
     plz = db.StringProperty(required=False)
     ort = db.StringProperty(required=False)
     email = db.EmailProperty(required=False)
-    typ = db.StringProperty(required=False)
-    ref = db.StringListProperty()
+    type = db.StringProperty(required=False)
     created_at = db.DateTimeProperty(auto_now_add=True)
     updated_at = db.DateTimeProperty(auto_now=True)
     created_by = db.UserProperty(required=False, auto_current_user_add=True, indexed=False)
@@ -34,8 +35,8 @@ class Akte(db.Model):
     def as_dict(self, abs_url=lambda x: x):
         """Format a Akte to be converted to JOSN or XML."""
         ret = {}
-        for fieldname in """designator tenant name1 name2 name3 strasse land plz ort email typ
-                         created_at updated_at""".split():
+        for fieldname in """designator tenant name1 name2 name3 strasse land plz ort email type
+                         seit created_at updated_at""".split():
             if getattr(self, fieldname):
                 ret[fieldname] = getattr(self, fieldname)
         ret['url'] = abs_url('/%s/akten/%s' % (self.tenant, self.designator))
@@ -61,8 +62,11 @@ class Dokument(db.Model):
     plz = db.StringProperty(required=False)
     ort = db.StringProperty(required=False)
     email = db.EmailProperty(required=False)
-    typ = db.StringProperty(required=False)
+    type = db.StringProperty(required=False)
+    quelle = db.StringProperty(required=False)
     ref = db.StringListProperty()
+    storage_location = db.StringProperty(default='datastore')
+    file_length = db.IntegerProperty()
     created_at = db.DateTimeProperty(auto_now_add=True)
     updated_at = db.DateTimeProperty(auto_now=True)
     created_by = db.UserProperty(required=False, auto_current_user_add=True, indexed=False)
@@ -74,7 +78,7 @@ class Dokument(db.Model):
     def as_dict(self, abs_url=lambda x: x):
         """Format a Dokument to be converted to JSON or XML."""
         ret = {}
-        for fieldname in """designator datum tenant name1 name2 name3 strasse land plz ort email typ
+        for fieldname in """designator datum tenant name1 name2 name3 strasse land plz ort email type quelle
                          created_at updated_at""".split():
             if getattr(self, fieldname):
                 ret[fieldname] = getattr(self, fieldname)

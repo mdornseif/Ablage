@@ -17,6 +17,7 @@ from google.appengine.ext import db
 from huTools.calendar.formats import convert_to_date
 import base64
 import datetime
+import gaetk.tools
 import hashlib
 import huTools.hujson as json
 import logging
@@ -94,24 +95,25 @@ class SearchHandler(BasicHandler):
         if designator:
             query1 = Akte.all().filter('tenant =', tenant).filter('designator =', designator)
             query2 = Dokument.all().filter('tenant =', tenant).filter('designator =', designator)
-            results = query1.fetch(10) + query2.fetch(20)
-            values = dict(results=[x.as_dict(self.abs_url) for x in results.fetch(10)],
+            query3 = Dokument.all().filter('tenant =', tenant).filter('ref =', designator)
+            query4 = Dokument.all().filter('tenant =', tenant).filter('ref =', designator)
+            results = list(set(query1.fetch(10) + query2.fetch(10) + query2.fetch(10) + query4.fetch(10)))
+            values = dict(results=[x.as_dict(self.abs_url) for x in results],
                           success=True)
         else:
             querystring = self.request.get('q')
             results = []
-            if len(querystring) < 3:
-                values = dict(error="query for 3 or more characters", success=False)
-            else:
+            # 'Term1 "Term2 and Term3"'.split() -> ['Term1', 'Term2 and Term3']
+            for part in gaetk.tools.split(self.request.get('q')):
                 # would be aswsome to run this in paralell
                 for model in [Akte, Dokument]:
-                    for field in ['designator', 'name1', 'plz', 'email', 'reference', 'name2', 'ort']:
+                    for field in ['designator', 'name1', 'plz', 'email', 'ref', 'name2', 'ort']:
                         query = model.all().filter('tenant =', tenant
-                                                   ).filter('%s >=' % field, querystring
-                                                   ).filter('%s <=' % field, querystring + u'\ufffd')
+                                                   ).filter('%s >=' % field, part
+                                                   ).filter('%s <=' % field, part + u'\ufffd')
                         results.extend([x.as_dict(self.abs_url) for x in query.fetch(25)])
-                # TODO: scoring and deduping
-                values = dict(results=results, success=True)
+            # TODO: scoring and deduping
+            values = dict(results=results, success=True)
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(values))
 
@@ -119,8 +121,10 @@ class SearchHandler(BasicHandler):
 class UploadHandler(BasicHandler):
     def post(self, tenant):
         pdfdata = self.request.POST['pdfdata'].file.read()
+        if len(pdfdata) > 900000:
+            raise RuntimeError('too large')
         ref = self.request.POST['ref']
-        typ = self.request.POST['typ']
+        typ = self.request.POST['type']
         refs = ref.split()
         if refs:
             akte_designator = refs[0]
@@ -135,7 +139,7 @@ class UploadHandler(BasicHandler):
             ref = ' '.join(list(set([akte_designator] + ref.split())))
             akte_designator = doc.akte.designator
 
-        akteargs = dict(typ=typ, designator=akte_designator)
+        akteargs = dict(type=typ, designator=akte_designator)
         for key in ('name1', 'name2', 'name3', 'strasse', 'land', 'plz', 'ort', 'email', 'ref_url',
                     'datum'):
             if self.request.POST.get(key):
@@ -147,16 +151,28 @@ class UploadHandler(BasicHandler):
         akte = Akte.get_or_insert(akte_designator, tenant=tenant, **akteargs)
         oldref = akte.ref
         newref = list(set(oldref + self.request.POST.get('ref', '').split()))
-        if newref != oldref:
+        newseit = oldseit = str(akte.seit)
+        if self.request.POST.get('datum') and (self.request.POST.get('datum') < oldseit):
+            newseit = convert_to_date(self.request.POST.get('datum'))
+        if (newref != oldref) or (newseit != oldseit):
+            akte.seit = newseit
             akte.ref = newref
             akte.put()
 
-        docargs = dict(typ=typ, datum=datetime.date.today())
+        docargs = dict(type=typ, datum=datetime.date.today(), file_length=len(pdfdata))
         for key in ('name1', 'name2', 'name3', 'strasse', 'land', 'plz', 'ort', 'email', 'ref_url',
-                    'datum'):
+                    'datum' 'quelle'):
             if self.request.POST.get(key):
                 docargs[key] = self.request.POST.get(key)
+        if 'datum' in docargs:
+            docargs['datum'] = convert_to_date(docargs['datum'])
         dokument = Dokument.get_or_insert(pdf_id, designator=pdf_id, akte=akte, tenant=tenant, **docargs)
+        # resave if it existed but something had changed
+        for key in docargs.keys():
+            if getattr(dokument, key) != docargs[key]:
+                logging.debug('%s: key %s has changed', pdf_id, key)
+                dokument.put()
+                break
         DokumentFile.get_or_insert(pdf_id, dokument=dokument, akte=akte, data=pdfdata,
                                    tenant=tenant, mimetype='application/pdf',
                                    filename=self.request.POST['pdfdata'].filename)

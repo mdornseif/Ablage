@@ -4,7 +4,7 @@ Ext.onReady(function() {
     var store = new Ext.data.JsonStore({
         xtype: 'jsonstore',
         storeId: 'MyStore',
-        url: 'http://localhost:8086/CYLGI/akten.json',
+        url: './akten.json',
         root: 'akten',
         autoLoad: true,
         restful: true,
@@ -14,7 +14,7 @@ Ext.onReady(function() {
             allowBlank: false
         },
         {
-            name: 'created_at',
+            name: 'seit',
             type: 'date',
             dateFormat: 'Y-m-d'
         },
@@ -44,7 +44,8 @@ Ext.onReady(function() {
             header: 'Ab',
             xtype: 'datecolumn',
             sortable: true,
-            dataIndex: 'created_at'
+            dataIndex: 'seit',
+            renderer: Ext.util.Format.dateRenderer('Y-m-d')
         },
         {
             header: 'tenant',
@@ -54,7 +55,7 @@ Ext.onReady(function() {
         ],
         stripeRows: true,
         height: 250,
-        width: 500,
+        width: 640,
         title: 'Akten',
         sm: new Ext.grid.RowSelectionModel(
         {
@@ -70,8 +71,8 @@ Ext.onReady(function() {
             pageSize: 25,
             store: store,
             displayInfo: true,
-            displayMsg: 'Displaying topics {0} - {1} of {2}',
-            emptyMsg: "No topics to display"
+            //displayMsg: 'Displaying topics {0} - {1} of {2}',
+            //emptyMsg: "No topics to display"
         })
 
     });

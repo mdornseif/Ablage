@@ -10,14 +10,14 @@ Copyright (c) 2010 HUDORA. All rights reserved.
 import config
 config.imported = True
 
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
+from gaetk import webapp2
 from ablage.views import MainHandler, PdfHandler, DokumentHandler, DokumenteHandler
 from ablage.views import AkteHandler, AktenHandler, SearchHandler, UploadHandler
 
 
 def main():
-    application = webapp.WSGIApplication(
+    application = webapp2.WSGIApplication(
     [
      ('/(\w+)/akten/(\w+)/pdf/(\w+)\.pdf', PdfHandler),
      ('/(\w+)/akten/(\w+)/docs/(\w+)[./]?(json)?', DokumentHandler),
@@ -29,7 +29,7 @@ def main():
      ('/', MainHandler),
     ],
     debug=True)
-    util.run_wsgi_app(application)
+    application.run()
 
 
 if __name__ == '__main__':

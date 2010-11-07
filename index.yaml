@@ -49,7 +49,7 @@ indexes:
 - kind: Akte
   properties:
   - name: tenant
-  - name: reference
+  - name: ref
 
 - kind: Dokument
   properties:
@@ -84,4 +84,4 @@ indexes:
 - kind: Dokument
   properties:
   - name: tenant
-  - name: reference
+  - name: ref
