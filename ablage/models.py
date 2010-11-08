@@ -11,6 +11,38 @@ import config
 config.imported = True
 
 from google.appengine.ext import db
+from huTools.luids import guid128
+
+
+class Credential(db.Model):
+    """Represents an access token and somebody who is allowed to use it.
+
+    Credentials MIGHT map to a google user object
+    """
+    tenant = db.StringProperty(required=True, default='CYLGI')
+    email = db.EmailProperty(required=False)
+    user = db.UserProperty(required=False)
+    uid = db.StringProperty(required=True)
+    secret = db.StringProperty(required=True)
+    text = db.StringProperty(required=False)
+    created_at = db.DateTimeProperty(auto_now_add=True)
+    updated_at = db.DateTimeProperty(auto_now=True)
+    created_by = db.UserProperty(required=False, auto_current_user_add=True)
+    updated_by = db.UserProperty(required=False, auto_current_user=True)
+
+    @classmethod
+    def create(cls, tenant, user=None, uid=None, text='', email=None):
+        """Creates a credential Object generating a random secret and a random uid if needed."""
+        secret = guid128(salt=str(tenant))[:12]
+        if not uid:
+            handmade_key = db.Key.from_path('Credential', 1)
+            uid = "u%s" % (db.allocate_ids(handmade_key, 1)[0])
+        instance = cls.get_or_insert(key_name=uid, uid=uid, secret=secret, tenant=tenant,
+                                     user=user, text=text, email=email)
+        return instance
+
+    def __repr__(self):
+        return "<Credential %s>" % self.uid
 
 
 class Akte(db.Model):

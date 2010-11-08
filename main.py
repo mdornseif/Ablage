@@ -10,9 +10,8 @@ Copyright (c) 2010 HUDORA. All rights reserved.
 import config
 config.imported = True
 
-from google.appengine.ext.webapp import util
 from gaetk import webapp2
-from ablage.views import MainHandler, PdfHandler, DokumentHandler, DokumenteHandler
+from ablage.views import CredentialsHandler, MainHandler, PdfHandler, DokumentHandler, DokumenteHandler
 from ablage.views import AkteHandler, AktenHandler, SearchHandler, UploadHandler
 
 
@@ -26,6 +25,7 @@ def main():
      ('/(\w+)/akten[./]?(html|json)?', AktenHandler),
      ('/(\w+)/docs', UploadHandler),
      ('/(\w+)/search', SearchHandler),
+     ('/credentials', CredentialsHandler),
      ('/', MainHandler),
     ],
     debug=True)

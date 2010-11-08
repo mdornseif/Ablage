@@ -12,8 +12,14 @@ handlers:
   static_dir: static
 
 - url: /favicon.ico
-  static_files: static/favicon.ico
-  upload: static/favicon.ico
+  static_files: static/favicon.png
+  upload: static/favicon.png
+
+- url: /_ah/login_required
+  script: lib/gaetk/gaetk/login.py
+
+- url: /logout
+  script: lib/gaetk/gaetk/login.py
 
 - url: .*
   script: main.py

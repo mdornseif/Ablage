@@ -11,9 +11,10 @@ Copyright (c) 2010 HUDORA. All rights reserved.
 import config
 config.imported = True
 
-from ablage.models import Akte, Dokument, DokumentFile
+from ablage.models import Credential, Akte, Dokument, DokumentFile
 from gaetk.handler import BasicHandler
 from google.appengine.ext import db
+from huTools import hujson
 from huTools.calendar.formats import convert_to_date
 import base64
 import datetime
@@ -23,6 +24,21 @@ import huTools.hujson as json
 import logging
 
 
+class CredentialsHandler(BasicHandler):
+    """Empfänger-Konfiguration - Write only."""
+    def post(self):
+        """Empfänger-Konfiguration updaten."""
+        user = self.login_required()
+        self.response.headers["Content-Type"] = "application/json"
+        tenant = user.tenant
+        # tenant = self.request.get('tenant')
+        text = self.request.get('text', '')
+        email = self.request.get('email')
+        credential = Credential.create(tenant=tenant, text=text, email=email)
+        self.response.set_status(201)
+        self.response.out.write(hujson.dumps(dict(uid=credential.uid, secret=credential.secret)))
+
+
 class MainHandler(BasicHandler):
     def get(self):
         self.response.out.write('Hello world!')
@@ -30,9 +46,9 @@ class MainHandler(BasicHandler):
 
 class PdfHandler(BasicHandler):
     def get(self, tenant, akte_id, doc_id):
-        logging.info(doc_id)
+        user = self.login_required()
         dfile = DokumentFile.get_by_key_name(doc_id)
-        if not dfile:
+        if (not dfile) or (user.tenant != tenant):
             raise RuntimeError('404')
         if dfile.akte and dfile.akte.key().name() != akte_id:
             raise RuntimeError('404')
@@ -44,7 +60,10 @@ class PdfHandler(BasicHandler):
 
 class DokumentHandler(BasicHandler):
     def get(self, tenant, akte_id, doc_id, format):
+        user = self.login_required()
         document = Dokument.get_by_key_name(doc_id)
+        if (not document) or (user.tenant != tenant):
+            raise RuntimeError('404')
         if document.akte.key().name() != akte_id:
             logging.info(document.akte.key().name())
             raise RuntimeError('404')
@@ -56,7 +75,11 @@ class DokumentHandler(BasicHandler):
 
 class DokumenteHandler(BasicHandler):
     def get(self, tenant, akte_id):
-        documents = Dokument.all().filter('akte =', db.Key.from_path('Akte', akte_id)).fetch(50)
+        user = self.login_required()
+        if (user.tenant != tenant):
+            raise RuntimeError('404')
+        documents = Dokument.all().filter('tenant =', tenant).filter(
+                                          'akte =', db.Key.from_path('Akte', akte_id)).fetch(50)
         documents = [x.as_dict(self.abs_url) for x in documents if tenant == x.tenant]
         values = dict(documents=documents, success=True)
         self.response.headers['Content-Type'] = 'application/json'
@@ -65,9 +88,10 @@ class DokumenteHandler(BasicHandler):
 
 class AkteHandler(BasicHandler):
     def get(self, tenant, designator, format):
+        user = self.login_required()
         if format == 'json':
             akte = Akte.get_by_key_name(designator)
-            if akte.tenant != tenant:
+            if (akte.tenant != tenant) or (user.tenant != tenant):
                 raise RuntimeError('404')
             values = dict(data=akte.as_dict(self.abs_url), success=True)
             self.response.headers['Cache-Control'] = 'max-age=15 private'
@@ -79,6 +103,9 @@ class AkteHandler(BasicHandler):
 
 class AktenHandler(BasicHandler):
     def get(self, tenant, format):
+        user = self.login_required()
+        if user.tenant != tenant:
+            raise RuntimeError('404')
         if format == 'json':
             query = Akte.all().filter('tenant =', tenant).order('-created_at')
             values = self.paginate(query, datanodename='akten')
@@ -91,17 +118,19 @@ class AktenHandler(BasicHandler):
 
 class SearchHandler(BasicHandler):
     def get(self, tenant):
+        user = self.login_required()
+        if user.tenant != tenant:
+            raise RuntimeError('404')
         designator = self.request.get('designator')
         if designator:
             query1 = Akte.all().filter('tenant =', tenant).filter('designator =', designator)
             query2 = Dokument.all().filter('tenant =', tenant).filter('designator =', designator)
             query3 = Dokument.all().filter('tenant =', tenant).filter('ref =', designator)
             query4 = Dokument.all().filter('tenant =', tenant).filter('ref =', designator)
-            results = list(set(query1.fetch(10) + query2.fetch(10) + query2.fetch(10) + query4.fetch(10)))
+            results = list(set(query1.fetch(10) + query2.fetch(10) + query3.fetch(10) + query4.fetch(10)))
             values = dict(results=[x.as_dict(self.abs_url) for x in results],
                           success=True)
         else:
-            querystring = self.request.get('q')
             results = []
             # 'Term1 "Term2 and Term3"'.split() -> ['Term1', 'Term2 and Term3']
             for part in gaetk.tools.split(self.request.get('q')):
@@ -120,6 +149,10 @@ class SearchHandler(BasicHandler):
 
 class UploadHandler(BasicHandler):
     def post(self, tenant):
+        user = self.login_required()
+        if user.tenant != tenant:
+            raise RuntimeError('404')
+        user = self.login_required()
         pdfdata = self.request.POST['pdfdata'].file.read()
         if len(pdfdata) > 900000:
             raise RuntimeError('too large')

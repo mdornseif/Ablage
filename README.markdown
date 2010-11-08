@@ -13,6 +13,16 @@ Jedes Dokument hat ein Ausstellungs-`datum` und eine Dokumentennummer (`designat
 
 
 
+curl -u $uid:$secret -X POST -F empfaenger=SC66666 -F admin=True \
+        -F text='fuer das Einspeisen von SoftM Daten' -F email='edv@hudora.de' \
+        http://hdedihub.appspot.com/admin/credentials
+
+curl -X POST -F tenant=CYLGI -F admin=True \
+        -F text='fuer das Einspeisen von huShop Daten' -F email='edv@hudora.de' \
+        http://localhost:8086/credentials
+
+
+
 API
 ===
 
