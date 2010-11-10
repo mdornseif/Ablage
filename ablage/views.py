@@ -47,12 +47,19 @@ class MainHandler(BasicHandler):
 class PdfHandler(BasicHandler):
     def get(self, tenant, akte_id, doc_id):
         user = self.login_required()
-        dfile = DokumentFile.get_by_key_name(doc_id)
-        if (not dfile) or (user.tenant != tenant):
+        dfile = DokumentFile.get_by_key_name("%s-%s" % (tenant, doc_id))
+        if not dfile:
+            logging.error('DocumentFile(%s-%s) not found' % (tenant, doc_id))
             raise RuntimeError('404')
-        if dfile.akte and dfile.akte.key().name() != akte_id:
+        if user.tenant != tenant:
+            logging.error('DocumentFile(%s-%s) wrong tenant for user' % (tenant, doc_id))
             raise RuntimeError('404')
         if dfile.tenant != tenant:
+            logging.error('DocumentFile(%s-%s) wrong tenant found' % (tenant, doc_id))
+            raise RuntimeError('404')
+        if dfile.akte and dfile.akte.key().name() != ("%s-%s" % (tenant, akte_id)):
+            logging.error('DocumentFile(%s-%s) wrong akte: %s %s', tenant, doc_id, akte_id,
+                            dfile.akte.key().name())
             raise RuntimeError('404')
         self.response.headers['Content-Type'] = 'application/pdf'
         self.response.out.write(dfile.data)
@@ -61,7 +68,7 @@ class PdfHandler(BasicHandler):
 class DokumentHandler(BasicHandler):
     def get(self, tenant, akte_id, doc_id, format):
         user = self.login_required()
-        document = Dokument.get_by_key_name(doc_id)
+        document = Dokument.get_by_key_name("%s-%s" % (tenant, doc_id))
         if (not document) or (user.tenant != tenant):
             raise RuntimeError('404')
         if document.akte.key().name() != akte_id:
@@ -79,7 +86,7 @@ class DokumenteHandler(BasicHandler):
         if (user.tenant != tenant):
             raise RuntimeError('404')
         documents = Dokument.all().filter('tenant =', tenant).filter(
-                                          'akte =', db.Key.from_path('Akte', akte_id)).fetch(50)
+                              'akte =', db.Key.from_path('Akte', "%s-%s" % (tenant, akte_id))).fetch(50)
         documents = [x.as_dict(self.abs_url) for x in documents if tenant == x.tenant]
         values = dict(documents=documents, success=True)
         self.response.headers['Content-Type'] = 'application/json'
@@ -90,8 +97,8 @@ class AkteHandler(BasicHandler):
     def get(self, tenant, designator, format):
         user = self.login_required()
         if format == 'json':
-            akte = Akte.get_by_key_name(designator)
-            if (akte.tenant != tenant) or (user.tenant != tenant):
+            akte = Akte.get_by_key_name("%s-%s" % (tenant, designator))
+            if (not akte) or (akte.tenant != tenant) or (user.tenant != tenant):
                 raise RuntimeError('404')
             values = dict(data=akte.as_dict(self.abs_url), success=True)
             self.response.headers['Cache-Control'] = 'max-age=15 private'
@@ -152,7 +159,6 @@ class UploadHandler(BasicHandler):
         user = self.login_required()
         if user.tenant != tenant:
             raise RuntimeError('404')
-        user = self.login_required()
         pdfdata = self.request.POST['pdfdata'].file.read()
         if len(pdfdata) > 900000:
             raise RuntimeError('too large')
@@ -165,12 +171,14 @@ class UploadHandler(BasicHandler):
             handmade_key = db.Key.from_path('Akte', 1)
             akte_designator = "ablage%s" % (db.allocate_ids(handmade_key, 1)[0])
         pdf_id = str(base64.b32encode(hashlib.sha1(pdfdata).digest()).rstrip('='))
-
+        key_name = "%s-%s" % (tenant, pdf_id)
+        
         # do we already have that document - ignore designator given by uploader
-        doc = Dokument.get_by_key_name(pdf_id)
+        doc = Dokument.get_by_key_name(key_name)
         if doc and doc.akte.designator != akte_designator:
             ref = ' '.join(list(set([akte_designator] + ref.split())))
             akte_designator = doc.akte.designator
+        akte_key = "%s-%s" % (tenant, akte_designator)
 
         akteargs = dict(type=typ, designator=akte_designator)
         for key in ('name1', 'name2', 'name3', 'strasse', 'land', 'plz', 'ort', 'email', 'ref_url',
@@ -181,12 +189,15 @@ class UploadHandler(BasicHandler):
                 akteargs[key] = self.request.POST.get('akte_%s' % key)
             if key == 'datum' and 'datum' in akteargs:
                 akteargs[key] = convert_to_date(akteargs[key])
-        akte = Akte.get_or_insert(akte_designator, tenant=tenant, **akteargs)
+        akte = Akte.get_or_insert(akte_key, tenant=tenant, **akteargs)
         oldref = akte.ref
         newref = list(set(oldref + self.request.POST.get('ref', '').split()))
-        newseit = oldseit = str(akte.seit)
-        if self.request.POST.get('datum') and (self.request.POST.get('datum') < oldseit):
-            newseit = convert_to_date(self.request.POST.get('datum'))
+        newseit = oldseit = akte.seit
+        if self.request.POST.get('datum'):
+            postseit = convert_to_date(self.request.POST.get('datum'))
+            logging.info("%r %r %r %r", akte.seit, newseit, oldseit, postseit)
+            if postseit < oldseit:
+                newseit = postseit
         if (newref != oldref) or (newseit != oldseit):
             akte.seit = newseit
             akte.ref = newref
@@ -199,14 +210,14 @@ class UploadHandler(BasicHandler):
                 docargs[key] = self.request.POST.get(key)
         if 'datum' in docargs:
             docargs['datum'] = convert_to_date(docargs['datum'])
-        dokument = Dokument.get_or_insert(pdf_id, designator=pdf_id, akte=akte, tenant=tenant, **docargs)
+        dokument = Dokument.get_or_insert(key_name, designator=pdf_id, akte=akte, tenant=tenant, **docargs)
         # resave if it existed but something had changed
         for key in docargs.keys():
             if getattr(dokument, key) != docargs[key]:
                 logging.debug('%s: key %s has changed', pdf_id, key)
                 dokument.put()
                 break
-        DokumentFile.get_or_insert(pdf_id, dokument=dokument, akte=akte, data=pdfdata,
+        DokumentFile.get_or_insert(key_name, dokument=dokument, akte=akte, data=pdfdata,
                                    tenant=tenant, mimetype='application/pdf',
                                    filename=self.request.POST['pdfdata'].filename)
         oldref = dokument.ref
