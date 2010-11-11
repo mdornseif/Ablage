@@ -157,8 +157,7 @@ class SearchHandler(BasicHandler):
 class UploadHandler(BasicHandler):
     def post(self, tenant):
         user = self.login_required()
-        if user.tenant != tenant:
-            raise RuntimeError('404')
+        tenant = user.tenant
         pdfdata = self.request.POST['pdfdata'].file.read()
         if len(pdfdata) > 900000:
             raise RuntimeError('too large')
@@ -196,7 +195,7 @@ class UploadHandler(BasicHandler):
         if self.request.POST.get('datum'):
             postseit = convert_to_date(self.request.POST.get('datum'))
             logging.info("%r %r %r %r", akte.seit, newseit, oldseit, postseit)
-            if postseit < oldseit:
+            if postseit and postseit and (postseit < postseit):
                 newseit = postseit
         if (newref != oldref) or (newseit != oldseit):
             akte.seit = newseit

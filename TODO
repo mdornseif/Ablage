@@ -1,2 +1,34 @@
-GUI für die Suche
-Audited Model
+Tenant beim erstlogin setzen
+
+= Search
+
+Provide a search page which uses the http://d-ablage.appspot.com/uid/search API and displayes the results in
+an ExtJS grid.
+
+
+= Upload
+
+Provie the user with an Interface to upload a Dokument file and associated Meta-Data using the
+http://d-ablage.appspot.com/CYLGI/docs interface.
+
+
+= Files > 1 MB
+
+Currently files are stored in the Datastore. Provide an alternative REST upload mechanism using the Blobstore
+API which alows files to be uploaded to the AppEngine blobstore. Use `Dokument.storage_location` to
+destinguish the two and ensure the HTTP API for reading Documents/PDFs also works regardless if PDFs are
+stored in the blobstore or in the datastore.
+
+
+= S3 Export
+
+a) provide a GUI per Tenant where s3 credentials and a destination bucket can be set.
+b) on each Document file save export two files to S3: the PDF file and a JSON file containing the metadata.
+
+
+= Auditing
+
+All changes to models should be logged. Meaning there should be a `AuditLog` Model which containse entries
+like "User mdornseif changed field `seit` on Akte (<designator>) from '2010-10-01' to '2010-11-01'". Best
+implementation strategy is probably to warp all the properties of an model and overwrite tue __set__ method
+of the properties.

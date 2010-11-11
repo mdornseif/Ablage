@@ -1,26 +1,42 @@
 Ablage
 ======
 
-Ablage ist eine PDF-Archivierungslösung für die AppEngine.
+Ablage is a PDF archival solution for Google AppEngine.
+
 
 Konzepte
 ========
 
-Es gibt `Akten`, die Grob einem Geschäftsvorfall (z.B. einer Rechung) Entsprechen. Zu jeder Akte gibt es ein oder mehrere `Dokumente`, die ein Gescanntes PDF beinhalten. Die kann z.B. die eigentliche rechung, eine Mahnung, ein Zahlschein usw sein.
+Es gibt `Akten`, die Grob einem Geschäftsvorfall (z.B. einer Rechung) Entsprechen. Zu jeder Akte gibt es ein
+oder mehrere `Dokumente`, die ein Gescanntes PDF beinhalten. Die kann z.B. die eigentliche rechung, eine
+Mahnung, ein Zahlschein usw sein.
 
-Jedes Dokument hat ein Ausstellungs-`datum` und eine Dokumentennummer (`designator`). Es kann auch eine Adresse nach dem [Simple Address Protocol][1] beinhalten.
+Jedes Dokument hat ein Ausstellungs-`datum` und eine Dokumentennummer (`designator`). Es kann auch eine
+Adresse nach dem [Simple Address Protocol][1] beinhalten.
 
 
+Usage
+=====
 
 
-curl -u $uid:$secret -X POST -F empfaenger=SC66666 -F admin=True \
-        -F text='fuer das Einspeisen von SoftM Daten' -F email='edv@hudora.de' \
-        http://hdedihub.appspot.com/admin/credentials
+    git clone http://github.com/mdornseif/Ablage.git
+    cd Ablage
+    make dependencies
+    <edit app.yaml>
+    make deploy
+    open http://dev.latest.d-ablage.appspot.com/TENANT/akten/
 
-curl -X POST -F tenant=CYLGI -F admin=True \
-        -F text='fuer das Einspeisen von huShop Daten' -F email='edv@hudora.de' \
-        http://localhost:8086/credentials
+Access control
+--------------
 
+You can log in via Google Apps or a uid:secret combination. Set the first uid:secret combination via the Datastore Admin. More can then created via the API.
+
+    curl -X POST -F tenant=TENANT -F admin=True -u $uid:$secret \
+        -F text='fuer das Einspeisen von huShop Daten' \
+        -F email='edv@example.com' http://localhost:8086/credentials
+
+Every set of credentials is assigned to a tenant which could signify a company or a group of users.
+For Google Apps the mapping of domainnames to tenants is currently hardcoded in login.py.
 
 
 API

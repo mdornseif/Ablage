@@ -37,6 +37,7 @@ skip_files:
 - ^(.*/)?(docs?|tests?)/.*
 - ^(.*/)?README.*
 - ^(.*/)?lib/google_appengine/.*
+- ^(.*/)?lib/gaetk/google/.*
 - ^(.*/)?testenv/.*
 - ^(.*/)?pythonenv/bin/.*
 - ^(.*/)?pythonenv/include/.*
