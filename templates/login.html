@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <title>
+            Log in with Google Apps
+        </title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <style type="text/css">
+body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: black;
+        margin:50px 0px;
+        padding:0px;
+        text-align: center;
+        }
+        div#container {
+        margin-left: 10%;
+        margin-right: 10%;
+        text-align: left;
+        }
+        h1 {
+        font-size: 5em;
+        font-style: normal;
+        font-weight: bold;
+        letter-spacing: -0.08em;
+        }
+        #headerh h1 {
+        margin-top:-0.4em;
+        margin-bottom:0.4em;
+        margin-left:-0.05em;
+        font-size: 5em;
+        font-style: normal;
+        font-weight: bold;
+        letter-spacing: -0.08em;
+        }
+        table {
+        border-collapse: collapse;
+        }
+        table th {
+        border-width: 1px;
+        padding: 3px;
+        border-style: dotted;
+        border-color: #ddd;
+        }
+        table td {
+        border-width: 1px;
+        padding: 3px;
+        border-style: solid;
+        border-color: #eee;
+        }
+        .currency {
+        text-align: right;
+        }
+        .currency:after {
+        content:" €";
+        }
+        .date { 
+        white-space: nowrap;
+        }
+        .pagination_prev {
+        float: left;
+        }
+        .pagination_next {
+        float: right;
+        }
+        div#navbar {
+        height: 30px;
+        width: 100%;
+        border-bottom: solid #000 1px;
+        color: #666;
+        }
+        div#navbar ul {
+        margin: 0px 1em;
+        padding: 0px;
+        line-height: 30px;
+        white-space: nowrap;
+        float: left;
+        }
+        div#navbar li {
+        list-style-type: none;
+        display: inline;
+        }
+        div#navbar li a {
+        text-decoration: none;
+        padding: 7px 10px;
+        color: #666;
+        }
+        div#navbar li a:link {
+        color: #666:
+        }
+        div#navbar li a:visited {
+        color: #666;
+        }
+        div#navbar li a:hover {
+        color: #FFF;
+        background-color: #000;
+        }
+        div#navbar li.selected a:link {
+        color: #fff;
+        background-color: #666;
+        }
+        div#navbar li.selected a:visited {
+        color: #fff;
+        background-color: #666;
+        }
+        div#navbar li.selected a:hover {
+        color: #fff;
+        background-color: #666;
+        }
+        div#footer {
+        margin-top: 30px;
+        font-size: 0.8em;
+        height: 15px;
+        width: 100%;
+        border-top: solid #000 1px;
+        color: #666;
+        }
+        div#footer ul {
+        margin: 0px 1em;
+        padding: 0px;
+        line-height: 30px;
+        white-space: nowrap;
+        float: left;
+        }
+        div#footer li {
+        list-style-type: none;
+        display: inline;
+        }
+        div#footer li a {
+        text-decoration: none;
+        padding: 7px 10px;
+        color: #666;
+        }
+        div#footer li a:link {
+        color: #666:
+        }
+        div#footer li a:visited {
+        color: #666;
+        }
+        div#footer li a:hover {
+        color: #FFF;
+        background-color: #000;
+        }
+        /* configuration pages */
+        #config .status {
+        font-size: smaller;
+        color: #888;
+        }
+        /* configuration pages */
+        #config .status.error {
+        font-size: smaller;
+        color: #f00;
+        }
+        /* rechnungslisten pages */
+        #rechnungsliste {
+        width: 100%;
+        }
+        tr.processed td {
+        font-weight: bold;
+        color: #aaa:
+        }
+        label {
+        float: left;
+        width: 100px;
+        padding: 0 1em;
+        text-align: right;
+        }
+        #submit {
+        width: 200px;
+        clear: both;
+        padding-top: 1em;
+        text-align: center;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <h1>
+                Login
+            </h1>
+            <form method="get" action="/_ah/login_required">
+                <div>
+                    <div>
+                        <label for="username">Username:</label> <input type="text" name="username">
+                    </div>
+                    <div>
+                        <label for="password">Password:</label> <input type="password" name="password">
+                    </div>
+                    <div id="submit">
+                        <input name="Submit" value="Submit" type="submit">
+                    </div>
+                </div>{% if continue %} <input type="hidden" name="continue" value="{{continue|escape}}"> {% endif %}
+                <p>- alternativ -</p>
+                <p>Login mit Google Apps von:</p>
+                
+                {% for domanin in domains %}
+                    <input type="image" src='/static/gappsauth/{{ domanin }}.png' width='200' style="padding:15px;" name="{{ domanin }}"><br/>
+                {% endfor %}
+            </form>
+        </div>
+    </body>
+</html>

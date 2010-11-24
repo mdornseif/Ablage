@@ -34,7 +34,7 @@ You can log in via Google Apps or a uid:secret combination. Set the first uid:se
     curl -X POST -F tenant=TENANT -F admin=True -u $uid:$secret \
         -F text='fuer das Einspeisen von huShop Daten' \
         -F email='edv@example.com' http://localhost:8086/credentials
-
+        
 Every set of credentials is assigned to a tenant which could signify a company or a group of users.
 For Google Apps the mapping of domainnames to tenants is currently hardcoded in login.py.
 
@@ -199,3 +199,8 @@ The following fields will be filled from their document related counterparts if 
 
 [1]: http://github.com/hudora/huTools/blob/master/doc/standards/address_protocol.markdown#readme
 [2]: http://www.gethifi.com/blog/browser-rest-http-accept-headers
+
+License
+=======
+
+This code is licensed under the GPL v3.

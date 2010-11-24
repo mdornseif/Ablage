@@ -18,13 +18,13 @@ from ablage.views import AkteHandler, AktenHandler, SearchHandler, UploadHandler
 def main():
     application = webapp2.WSGIApplication(
     [
-     ('/(\w+)/akten/(\w+)/pdf/(\w+)\.pdf', PdfHandler),
-     ('/(\w+)/akten/(\w+)/docs/(\w+)[./]?(json)?', DokumentHandler),
-     ('/(\w+)/akten/(\w+)/docs.json', DokumenteHandler),
-     ('/(\w+)/akten/(\w+)[./]?(html|json)?', AkteHandler),
-     ('/(\w+)/akten[./]?(html|json)?', AktenHandler),
-     ('/(\w+)/docs', UploadHandler),
-     ('/(\w+)/search', SearchHandler),
+     ('/([a-z.-]+)/akten/(\w+)/pdf/(\w+)\.pdf', PdfHandler),
+     ('/([a-z.-]+)/akten/(\w+)/docs/(\w+)[./]?(json)?', DokumentHandler),
+     ('/([a-z.-]+)/akten/(\w+)/docs.json', DokumenteHandler),
+     ('/([a-z.-]+)/akten/(\w+)[./]?(html|json)?', AkteHandler),
+     ('/([a-z.-]+)/akten[./]?(html|json)?', AktenHandler),
+     ('/([a-z.-]+)/docs', UploadHandler),
+     ('/([a-z.-]+)/search', SearchHandler),
      ('/credentials', CredentialsHandler),
      ('/', MainHandler),
     ],

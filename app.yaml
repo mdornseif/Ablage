@@ -15,6 +15,14 @@ handlers:
   static_files: static/favicon.png
   upload: static/favicon.png
 
+- url: /_ah/queue/deferred
+  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
+  login: admin
+
+- url: /mapreduce(/.*)?
+  script: mapreduce/main.py
+  login: admin
+  
 - url: /_ah/login_required
   script: lib/gaetk/gaetk/login.py
 
@@ -25,7 +33,6 @@ handlers:
   script: main.py
 
 skip_files:
-- ^(.*/)?.*\.yaml
 - ^(.*/)?.*~
 - ^(.*/)?.*\.py[co]
 - ^(.*/)?\..*

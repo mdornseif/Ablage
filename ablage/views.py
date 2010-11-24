@@ -12,7 +12,7 @@ import config
 config.imported = True
 
 from ablage.models import Credential, Akte, Dokument, DokumentFile
-from gaetk.handler import BasicHandler
+from gaetk.handler import BasicHandler, HTTP400_BadRequest, HTTP413_TooLarge
 from google.appengine.ext import db
 from huTools import hujson
 from huTools.calendar.formats import convert_to_date
@@ -158,9 +158,13 @@ class UploadHandler(BasicHandler):
     def post(self, tenant):
         user = self.login_required()
         tenant = user.tenant
+        if not hasattr(self.request.POST['pdfdata'], 'file'):
+            logging.debug(dir(self.request))
+            logging.debug(vars(self.request))
+            HTTP400_BadRequest('pdfdata not a file')
         pdfdata = self.request.POST['pdfdata'].file.read()
         if len(pdfdata) > 900000:
-            raise RuntimeError('too large')
+            raise HTTP413_TooLarge('PDF bigger than 900k')
         ref = self.request.POST['ref']
         typ = self.request.POST['type']
         refs = ref.split()
@@ -179,7 +183,8 @@ class UploadHandler(BasicHandler):
             akte_designator = doc.akte.designator
         akte_key = "%s-%s" % (tenant, akte_designator)
 
-        akteargs = dict(type=typ, designator=akte_designator)
+        akteargs = dict(type=typ, designator=akte_designator,
+                        datum=convert_to_date(self.request.POST.get('datum')))
         for key in ('name1', 'name2', 'name3', 'strasse', 'land', 'plz', 'ort', 'email', 'ref_url',
                     'datum'):
             if self.request.POST.get(key):
@@ -194,7 +199,6 @@ class UploadHandler(BasicHandler):
         newseit = oldseit = akte.seit
         if self.request.POST.get('datum'):
             postseit = convert_to_date(self.request.POST.get('datum'))
-            logging.info("%r %r %r %r", akte.seit, newseit, oldseit, postseit)
             if postseit and postseit and (postseit < postseit):
                 newseit = postseit
         if (newref != oldref) or (newseit != oldseit):
