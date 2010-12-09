@@ -1,4 +1,0 @@
-httplib2
-boto
---editable git+http://github.com/sixapart/python-simpledb.git#egg=simpledb
---editable git+ssh://git@github.com/hudora/CentralServices.git#egg=cs
