@@ -3,9 +3,8 @@ deploy:
 	git diff-index --quiet --cached HEAD
 	# no uncomitted changes
 	git diff-files --quiet
-	VERSION=`grep -E '^version: ' app.yaml | cut -d ' ' -f 2`
-	git branch -f deploy_$(VERSION)
-	git push -f . deploy_$(VERSION)
+	git branch -f deploy_`grep -E '^version: ' app.yaml | cut -d ' ' -f 2`
+	git push -f . deploy_`grep -E '^version: ' app.yaml | cut -d ' ' -f 2`
 	appcfg.py update .
 
 check: lib/google_appengine/google/__init__.py
