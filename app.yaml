@@ -1,5 +1,5 @@
 application: d-ablage
-version: v1a
+version: dev
 runtime: python
 api_version: 1
 
