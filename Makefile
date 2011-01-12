@@ -1,5 +1,6 @@
-deploy:
-        # index must be clean
+deploy: dependencies
+	# check
+	# index must be clean
 	git diff-index --quiet --cached HEAD
 	# no uncomitted changes
 	git diff-files --quiet
@@ -19,15 +20,10 @@ lib/google_appengine/google/__init__.py:
 	mv google_appengine lib/
 	rm google_appengine_1.3.8.zip
 
-dependencies: clean
-	git submodule init lib/huTools
-	git submodule init lib/gaetk
-	git submodule init lib/jinja2
-	git submodule update lib/huTools
-	git submodule update lib/gaetk
-	git submodule update lib/jinja2
-	virtualenv --python=python2.5 --no-site-packages --unzip-setuptools pythonenv
-	pythonenv/bin/pip -q install -E pythonenv -r requirements.txt
+dependencies:
+	git submodule update --init lib/huTools
+	git submodule update --init lib/gaetk
+	git submodule update --init lib/jinja2
 
 clean:
 	rm -Rf pythonenv/
