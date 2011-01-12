@@ -1,5 +1,5 @@
 application: d-ablage
-version: dev
+version: v1a
 runtime: python
 api_version: 1
 
@@ -18,6 +18,9 @@ handlers:
 - url: /_ah/queue/deferred
   script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
   login: admin
+
+- url: /gaetk/.*
+  script: lib/gaetk/gaetk/defaulthandlers.py
 
 - url: /mapreduce(/.*)?
   script: mapreduce/main.py
